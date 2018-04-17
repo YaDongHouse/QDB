@@ -1,0 +1,127 @@
+apply plugin: 'com.android.application'
+
+def keystoreProperties = new Properties()
+def keystorePropertiesFile = rootProject.file("keyStore.properties")
+keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+
+android {
+
+    signingConfigs {
+        debug {
+            keyAlias keystoreProperties['keyAlias_deb']
+            keyPassword keystoreProperties['keyPassword_deb']
+            storeFile file(keystoreProperties['storeFile_deb'])
+            storePassword keystoreProperties['storePassword_deb']
+        }
+        release {
+            keyAlias keystoreProperties['keyAlias_rel']
+            keyPassword keystoreProperties['keyPassword_rel']
+            storeFile file(keystoreProperties['storeFile_rel'])
+            storePassword keystoreProperties['storePassword_rel']
+        }
+    }
+
+    compileSdkVersion 26
+
+    defaultConfig {
+        applicationId "com.dong.qdb"
+        minSdkVersion 16
+        targetSdkVersion 26
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+
+        //调试版本
+        debug {
+            //是否可调试 默认debug是true release是false
+            debuggable true
+            //debug与release的默认值都为false,如果需要混淆需要手动配置为true;
+            minifyEnabled false
+            //是否对齐app所有资源,对齐后,会使得在运行时Android与应用程序间的交互更加有效率;
+            zipAlignEnabled true
+            //配置true,移除无用的resource文件
+            shrinkResources false
+
+//            buildConfigField "String", "Pad_service", "邱亚东测试"
+
+            signingConfig signingConfigs.debug
+
+
+        }
+
+        //发布版本
+        release {
+            debuggable false
+
+            minifyEnabled true
+
+            zipAlignEnabled true
+
+            shrinkResources true
+
+            signingConfig signingConfigs.release
+
+//            buildConfigField "String", "Pad_service", "邱亚东正式"
+
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+
+
+    flavorDimensions 'store'
+
+    productFlavors {
+        //渠道1
+        dong1 {
+            dimension "store"
+            applicationId "com.dong.qdb.a"
+            versionName "version-a-1.0"
+            versionCode 1
+        }
+        //渠道2
+        dong2 {
+            dimension "store"
+            applicationId "com.dong.qdb.b"
+            versionName "version-b-1.0"
+            versionCode 2
+        }
+        //渠道1
+        dong3 {
+            dimension "store"
+            applicationId "com.dong.qdb.c"
+            versionName "version-c-1.0"
+            versionCode 3
+        }
+    }
+
+    applicationVariants.all { variant ->
+
+        variant.outputs.all {
+            outputFileName = "${rootProject.name}-" +
+                    "${versionName}-" +
+                    "${versionCode}" +
+                    "${releaseTime()}-" +
+                    "${variant.buildType.name}.apk"
+        }
+    }
+
+}
+
+// 定义一个打包时间
+def releaseTime() {
+    return new Date().format("yyyyMMddHHmm")
+}
+
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'com.android.support:appcompat-v7:26.1.0'
+    implementation 'com.android.support.constraint:constraint-layout:1.0.2'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'com.android.support.test:runner:1.0.1'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
+}
